@@ -11,6 +11,7 @@ import '../domain/session.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/session_provider.dart';
 import '../services/audio_service.dart';
+import '../services/notification_service.dart';
 import '../theme/palette.dart';
 import '../widgets/progress_ring.dart';
 
@@ -97,6 +98,9 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       (_) => _onTick(),
     );
     unawaited(_acquireWakelock());
+    final endsAt = DateTime.now()
+        .add(Duration(seconds: _totalSeconds) - _elapsedBefore);
+    unawaited(ref.read(notificationServiceProvider).scheduleSitComplete(endsAt));
     setState(() {});
   }
 
@@ -106,6 +110,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       _runStartedAt = null;
     }
     unawaited(_releaseWakelock());
+    unawaited(ref.read(notificationServiceProvider).cancel());
     setState(() {});
   }
 
@@ -132,6 +137,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   Future<void> _onComplete() async {
     _ticker?.cancel();
     unawaited(_releaseWakelock());
+    unawaited(ref.read(notificationServiceProvider).cancel());
     unawaited(ref.read(audioServiceProvider).ringBell());
     final pending = ref.read(pendingSessionProvider);
     if (pending != null) {
@@ -195,6 +201,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
   void _exit() {
     _ticker?.cancel();
+    unawaited(_releaseWakelock());
+    unawaited(ref.read(notificationServiceProvider).cancel());
     if (context.canPop()) {
       context.pop();
     } else {
