@@ -34,12 +34,6 @@ class _PlaceholderScreen extends StatelessWidget {
   }
 }
 
-class SetupScreen extends StatelessWidget {
-  const SetupScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const _PlaceholderScreen('Begin a session');
-}
-
 class TimerScreen extends StatelessWidget {
   const TimerScreen({super.key});
   @override
