@@ -5,6 +5,7 @@ import 'screens/complete_screen.dart';
 import 'screens/data_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholders.dart';
+import 'screens/recovery_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/setup_screen.dart';
 import 'screens/stats_screen.dart';

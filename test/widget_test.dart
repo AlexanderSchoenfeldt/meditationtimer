@@ -171,6 +171,37 @@ void main() {
     expect(state.sessions.first.minutes, 20);
   });
 
+  testWidgets('Recovery: Add N-day streak seeds the sessions', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final container = ProviderContainer(
+      overrides: [
+        storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+        routerProvider.overrideWith((_) => buildRouter(initial: '/recovery')),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add past practice'), findsOneWidget);
+    expect(find.text('Add 30-day streak'), findsOneWidget);
+
+    await tester.tap(find.text('Add 30-day streak'));
+    await tester.pumpAndSettle();
+
+    final state = await container.read(appStateProvider.future);
+    expect(state.sessions.length, 30);
+    expect(state.sessions.every((s) => s.minutes == 15), true);
+  });
+
   testWidgets('Setup → Start lands on Timer with remaining time',
       (tester) async {
     await tester.pumpWidget(

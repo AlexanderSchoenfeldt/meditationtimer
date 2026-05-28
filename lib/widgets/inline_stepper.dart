@@ -26,7 +26,7 @@ class InlineStepper extends StatelessWidget {
         _btn(p, Icons.remove, onDecrement),
         const SizedBox(width: 6),
         SizedBox(
-          width: 96,
+          width: 104,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.baseline,

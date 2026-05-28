@@ -34,12 +34,6 @@ class _PlaceholderScreen extends StatelessWidget {
   }
 }
 
-class RecoveryScreen extends StatelessWidget {
-  const RecoveryScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const _PlaceholderScreen('Recovery');
-}
-
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
   @override
