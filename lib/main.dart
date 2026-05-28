@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'providers/app_state_provider.dart';
 import 'theme/app_theme.dart';
 import 'theme/palette.dart';
 
@@ -8,19 +9,54 @@ void main() {
   runApp(const ProviderScope(child: IntentionApp()));
 }
 
-final appThemeProvider = StateProvider<AppTheme>((_) => AppTheme.light);
-
 class IntentionApp extends ConsumerWidget {
   const IntentionApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = ref.watch(appThemeProvider);
+    final state = ref.watch(appStateProvider);
+    final palette = ref.watch(paletteProvider);
     return MaterialApp(
       title: 'Intention',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(Palette.of(mode)),
-      home: const _ThemePreview(),
+      theme: buildTheme(palette),
+      home: state.when(
+        data: (_) => const _ThemePreview(),
+        loading: () => const _Splash(),
+        error: (e, _) => _ErrorView(error: e),
+      ),
+    );
+  }
+}
+
+class _Splash extends StatelessWidget {
+  const _Splash();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: const Center(child: Wordmark()),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final Object error;
+  const _ErrorView({required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Could not load your data.\n$error',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -31,7 +67,8 @@ class _ThemePreview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.palette;
-    final mode = ref.watch(appThemeProvider);
+    final state = ref.watch(appStateProvider).requireValue;
+    final streak = ref.watch(streakProvider);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -39,7 +76,8 @@ class _ThemePreview extends ConsumerWidget {
             const SizedBox(height: 24),
             const Wordmark(),
             const Spacer(),
-            Text('23', style: Theme.of(context).textTheme.displayLarge),
+            Text('${streak.streak}',
+                style: Theme.of(context).textTheme.displayLarge),
             const SizedBox(height: 4),
             Text('DAYS IN A ROW',
                 style: Theme.of(context).textTheme.labelMedium),
@@ -65,14 +103,16 @@ class _ThemePreview extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: TextButton(
-                      onPressed: () =>
-                          ref.read(appThemeProvider.notifier).state = m,
+                      onPressed: () => ref
+                          .read(appStateProvider.notifier)
+                          .setTheme(m),
                       child: Text(
                         m.name,
                         style: TextStyle(
-                          color: m == mode ? p.ink : p.ink3,
-                          fontWeight:
-                              m == mode ? FontWeight.w600 : FontWeight.w400,
+                          color: m == state.settings.theme ? p.ink : p.ink3,
+                          fontWeight: m == state.settings.theme
+                              ? FontWeight.w600
+                              : FontWeight.w400,
                         ),
                       ),
                     ),

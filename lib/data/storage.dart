@@ -5,7 +5,12 @@ import 'package:path_provider/path_provider.dart';
 
 import '../domain/app_state.dart';
 
-class Storage {
+abstract class Storage {
+  Future<AppState> load();
+  Future<void> save(AppState state);
+}
+
+class FileStorage implements Storage {
   static const _fileName = 'state.json';
 
   Future<File> _file() async {
@@ -13,6 +18,7 @@ class Storage {
     return File('${dir.path}/$_fileName');
   }
 
+  @override
   Future<AppState> load() async {
     try {
       final f = await _file();
@@ -27,11 +33,25 @@ class Storage {
     }
   }
 
+  @override
   Future<void> save(AppState state) async {
     final f = await _file();
     await f.writeAsString(
       const JsonEncoder.withIndent('  ').convert(state.toJson()),
       flush: true,
     );
+  }
+}
+
+class MemoryStorage implements Storage {
+  AppState _state;
+  MemoryStorage([AppState initial = AppState.empty]) : _state = initial;
+
+  @override
+  Future<AppState> load() async => _state;
+
+  @override
+  Future<void> save(AppState state) async {
+    _state = state;
   }
 }
