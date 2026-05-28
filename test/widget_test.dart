@@ -1,12 +1,14 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
+import 'package:intention/data/dates.dart';
 import 'package:intention/data/storage.dart';
 import 'package:intention/domain/app_state.dart';
+import 'package:intention/domain/session.dart';
 import 'package:intention/main.dart';
 import 'package:intention/providers/app_state_provider.dart';
-
-import 'package:flutter/material.dart';
+import 'package:intention/router.dart';
 
 void main() {
   testWidgets('Home shows wordmark, time-of-day, and Begin', (tester) async {
@@ -47,6 +49,56 @@ void main() {
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pump();
     expect(find.text('Start · 25 min'), findsOneWidget);
+  });
+
+  testWidgets('Stats shows empty state with no sessions', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          routerProvider.overrideWith((_) => buildRouter(initial: '/stats')),
+        ],
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Stats'), findsOneWidget);
+    expect(find.textContaining('Your practice will live here'), findsOneWidget);
+  });
+
+  testWidgets('Stats renders totals and streaks with seeded sessions',
+      (tester) async {
+    final today = DateTime.now();
+    final seeded = AppState(
+      sessions: [
+        Session(
+          date: todayKey(dateAdd(today, -1)),
+          minutes: 20,
+          ts: dateAdd(today, -1).millisecondsSinceEpoch,
+        ),
+        Session(
+          date: todayKey(today),
+          minutes: 30,
+          ts: today.millisecondsSinceEpoch,
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storageProvider.overrideWithValue(MemoryStorage(seeded)),
+          routerProvider.overrideWith((_) => buildRouter(initial: '/stats')),
+        ],
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('TOTAL PRACTICE'), findsOneWidget);
+    expect(find.text('Current streak'), findsOneWidget);
+    expect(find.text('Longest streak'), findsOneWidget);
+    expect(find.text('LAST 8 WEEKS'), findsOneWidget);
+    // 50 minutes total surfaces as a serif numeral somewhere on screen
+    expect(find.text('50'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('Setup → Start lands on Timer with remaining time',
