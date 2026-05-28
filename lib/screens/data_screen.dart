@@ -1,10 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../data/dates.dart';
 import '../data/export.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/palette.dart';
@@ -47,6 +53,51 @@ class _DataScreenState extends ConsumerState<DataScreen> {
     final text = exportText(state);
     await Clipboard.setData(ClipboardData(text: text));
     _showFlash('Copied to clipboard');
+  }
+
+  Future<void> _saveExport() async {
+    try {
+      final state = ref.read(appStateProvider).requireValue;
+      final text = exportText(state);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/intention-${todayKey()}.txt');
+      await file.writeAsString(text);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'text/plain')],
+        subject: 'Intention backup',
+      );
+      if (!mounted) return;
+      _showFlash('Exported');
+    } catch (e) {
+      if (kDebugMode) debugPrint('Save export failed: $e');
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not save the file on this device.';
+        _flash = null;
+      });
+    }
+  }
+
+  Future<void> _pickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['txt', 'json'],
+      );
+      if (result == null || result.files.single.path == null) return;
+      final file = File(result.files.single.path!);
+      final text = await file.readAsString();
+      if (!mounted) return;
+      _importController.text = text;
+      setState(() => _error = null);
+    } catch (e) {
+      if (kDebugMode) debugPrint('Pick file failed: $e');
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not open the file.';
+        _flash = null;
+      });
+    }
   }
 
   Future<void> _restore() async {
@@ -150,19 +201,20 @@ class _DataScreenState extends ConsumerState<DataScreen> {
           const SizedBox(height: 14),
           _CodePreview(text: preview),
           const SizedBox(height: 14),
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
+              GhostButton(label: 'Save file…', onPressed: _saveExport),
               GhostButton(label: 'Copy to clipboard', onPressed: _copyExport),
-              const SizedBox(width: 12),
               if (_flash != null)
-                Expanded(
-                  child: Text(
-                    _flash!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: p.ink2,
-                      fontStyle: FontStyle.italic,
-                    ),
+                Text(
+                  _flash!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: p.ink2,
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
             ],
@@ -173,10 +225,28 @@ class _DataScreenState extends ConsumerState<DataScreen> {
           _SectionTitle('IMPORT'),
           const SizedBox(height: 12),
           Text(
-            'Paste the contents of a backup file below — the # comment lines are fine to keep.',
+            'Open a backup file or paste its contents below — the # comment lines are fine to keep.',
             style: TextStyle(fontSize: 13, color: p.ink3, height: 1.55),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _pickFile,
+              icon: Icon(Icons.folder_open_outlined, color: p.ink2, size: 16),
+              label: Text('Open file…',
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: p.ink2,
+                      letterSpacing: 0.2)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           TextField(
             controller: _importController,
             maxLines: 8,
