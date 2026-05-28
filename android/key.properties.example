@@ -1,0 +1,16 @@
+# Copy this file to android/key.properties (gitignored) and fill in
+# your own keystore details. Generate the keystore with:
+#
+#   keytool -genkey -v \
+#     -keystore android/upload-keystore.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 \
+#     -alias intention
+#
+# Keep upload-keystore.jks and key.properties out of git. Back them up
+# somewhere safe — losing either means you can't ship signed updates of
+# the same app.
+
+storeFile=upload-keystore.jks
+storePassword=changeme
+keyAlias=intention
+keyPassword=changeme
