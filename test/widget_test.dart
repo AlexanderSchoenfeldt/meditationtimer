@@ -7,7 +7,7 @@ import 'package:intention/main.dart';
 import 'package:intention/providers/app_state_provider.dart';
 
 void main() {
-  testWidgets('App boots into Home with empty state', (tester) async {
+  testWidgets('Home shows wordmark, time-of-day, and Begin', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -19,7 +19,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('INTENTION'), findsOneWidget);
     expect(find.text('Begin'), findsOneWidget);
-    expect(find.text('CURRENT STREAK'), findsOneWidget);
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('or sit without a timer'), findsOneWidget);
+    // exactly one of the five possible part-of-day labels is shown
+    final labels = ['late night', 'morning', 'afternoon', 'evening', 'night'];
+    expect(labels.where((l) => find.text(l).evaluate().isNotEmpty).length, 1);
   });
 }

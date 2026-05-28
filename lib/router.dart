@@ -15,5 +15,6 @@ final router = GoRouter(
     GoRoute(path: '/data', builder: (_, _) => const DataScreen()),
     GoRoute(path: '/recovery', builder: (_, _) => const RecoveryScreen()),
     GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
+    GoRoute(path: '/open-sit', builder: (_, _) => const OpenSitScreen()),
   ],
 );

@@ -81,3 +81,9 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const _PlaceholderScreen('Welcome');
 }
+
+class OpenSitScreen extends StatelessWidget {
+  const OpenSitScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const _PlaceholderScreen('Open sit');
+}
