@@ -34,12 +34,6 @@ class _PlaceholderScreen extends StatelessWidget {
   }
 }
 
-class DataScreen extends StatelessWidget {
-  const DataScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const _PlaceholderScreen('Data');
-}
-
 class RecoveryScreen extends StatelessWidget {
   const RecoveryScreen({super.key});
   @override

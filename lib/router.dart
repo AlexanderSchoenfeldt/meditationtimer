@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'screens/complete_screen.dart';
+import 'screens/data_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholders.dart';
 import 'screens/settings_screen.dart';

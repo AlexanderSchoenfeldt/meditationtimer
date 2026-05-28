@@ -133,6 +133,44 @@ void main() {
     expect(find.text('Numerals'), findsOneWidget);
   });
 
+  testWidgets('Data: pasting a session JSON and tapping Restore adds it',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final container = ProviderContainer(
+      overrides: [
+        storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+        routerProvider.overrideWith((_) => buildRouter(initial: '/data')),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('EXPORT'), findsOneWidget);
+    expect(find.text('IMPORT'), findsOneWidget);
+    expect(find.text('Copy to clipboard'), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextField),
+      '{"sessions":[{"date":"2026-05-01","minutes":20}]}',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Restore'));
+    await tester.pumpAndSettle();
+
+    final state = await container.read(appStateProvider.future);
+    expect(state.sessions.length, 1);
+    expect(state.sessions.first.minutes, 20);
+  });
+
   testWidgets('Setup → Start lands on Timer with remaining time',
       (tester) async {
     await tester.pumpWidget(
