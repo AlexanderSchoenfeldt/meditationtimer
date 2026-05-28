@@ -7,7 +7,7 @@ import 'package:intention/main.dart';
 import 'package:intention/providers/app_state_provider.dart';
 
 void main() {
-  testWidgets('App boots, finishes loading, and shows wordmark', (tester) async {
+  testWidgets('App boots into Home with empty state', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -19,6 +19,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('INTENTION'), findsOneWidget);
     expect(find.text('Begin'), findsOneWidget);
-    expect(find.text('0'), findsOneWidget); // streak default
+    expect(find.text('CURRENT STREAK'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
   });
 }
