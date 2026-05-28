@@ -1,13 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../data/dates.dart';
 import '../domain/session.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/session_provider.dart';
+import '../services/audio_service.dart';
 import '../theme/palette.dart';
 import '../widgets/progress_ring.dart';
 
@@ -50,7 +53,24 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
+    _releaseWakelock();
     super.dispose();
+  }
+
+  Future<void> _acquireWakelock() async {
+    try {
+      await WakelockPlus.enable();
+    } catch (e) {
+      if (kDebugMode) debugPrint('Wakelock acquire failed: $e');
+    }
+  }
+
+  Future<void> _releaseWakelock() async {
+    try {
+      await WakelockPlus.disable();
+    } catch (_) {
+      // ignore — already released or platform unsupported
+    }
   }
 
   bool get _running => _runStartedAt != null;
@@ -76,6 +96,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       const Duration(milliseconds: 250),
       (_) => _onTick(),
     );
+    unawaited(_acquireWakelock());
     setState(() {});
   }
 
@@ -84,6 +105,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       _elapsedBefore += DateTime.now().difference(_runStartedAt!);
       _runStartedAt = null;
     }
+    unawaited(_releaseWakelock());
     setState(() {});
   }
 
@@ -97,7 +119,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         elapsedMin % _bellMinutes == 0 &&
         elapsedMin != _lastBellMin) {
       _lastBellMin = elapsedMin;
-      // Audio hook lives here — Phase 4 wires just_audio.
+      unawaited(ref.read(audioServiceProvider).ringBell());
     }
     if (_elapsed.inSeconds >= _totalSeconds && !_completed) {
       _completed = true;
@@ -109,6 +131,8 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
 
   Future<void> _onComplete() async {
     _ticker?.cancel();
+    unawaited(_releaseWakelock());
+    unawaited(ref.read(audioServiceProvider).ringBell());
     final pending = ref.read(pendingSessionProvider);
     if (pending != null) {
       final now = DateTime.now();
