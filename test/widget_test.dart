@@ -48,4 +48,30 @@ void main() {
     await tester.pump();
     expect(find.text('Start · 25 min'), findsOneWidget);
   });
+
+  testWidgets('Setup → Start lands on Timer with remaining time',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+        ],
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Begin'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start · 15 min'));
+    await tester.pump(); // schedule navigation
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('REMAINING'), findsOneWidget);
+    expect(find.text('OF 15 min'), findsOneWidget);
+    // Pause icon shown while running
+    expect(find.byIcon(Icons.pause), findsOneWidget);
+    // Stop ticker so the test ends cleanly
+    await tester.tap(find.byIcon(Icons.pause));
+    await tester.pump();
+    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+  });
 }

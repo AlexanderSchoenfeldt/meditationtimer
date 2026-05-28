@@ -23,7 +23,7 @@ class IntentionApp extends ConsumerWidget {
         title: 'Intention',
         debugShowCheckedModeBanner: false,
         theme: theme,
-        routerConfig: router,
+        routerConfig: ref.watch(routerProvider),
       ),
       loading: () => MaterialApp(
         theme: theme,

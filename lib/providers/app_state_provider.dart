@@ -4,6 +4,7 @@ import '../data/storage.dart';
 import '../data/streak.dart';
 import '../domain/app_state.dart';
 import '../domain/preset.dart';
+import '../domain/session.dart';
 import '../theme/palette.dart';
 
 final storageProvider = Provider<Storage>((_) => FileStorage());
@@ -52,6 +53,14 @@ class AppStateController extends AsyncNotifier<AppState> {
 
   Future<void> updateLastUsed(LastUsed last) =>
       _mutate((s) => s.copyWith(lastUsed: last));
+
+  Future<void> addSession(Session session) => _mutate((s) => s.copyWith(
+        sessions: [...s.sessions, session],
+        clearStreakDismissed: true,
+      ));
+
+  Future<void> dismissStreakRecoveryToday(String dayKey) => _mutate(
+      (s) => s.copyWith(streakDismissedFor: dayKey));
 }
 
 final appStateProvider =
