@@ -35,11 +35,17 @@ class FileStorage implements Storage {
 
   @override
   Future<void> save(AppState state) async {
-    final f = await _file();
-    await f.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(state.toJson()),
-      flush: true,
-    );
+    try {
+      final f = await _file();
+      await f.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(state.toJson()),
+        flush: true,
+      );
+    } catch (_) {
+      // Persistence failure shouldn't break the UI flow. On a supported
+      // platform the file write always succeeds; on web there is no file
+      // path, so we swallow and accept the lack of persistence.
+    }
   }
 }
 
