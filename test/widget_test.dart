@@ -15,7 +15,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          storageProvider.overrideWithValue(
+              MemoryStorage(const AppState(onboarded: true))),
         ],
         child: const IntentionApp(),
       ),
@@ -32,7 +33,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          storageProvider.overrideWithValue(
+              MemoryStorage(const AppState(onboarded: true))),
         ],
         child: const IntentionApp(),
       ),
@@ -55,7 +57,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          storageProvider.overrideWithValue(
+              MemoryStorage(const AppState(onboarded: true))),
           routerProvider.overrideWith((_) => buildRouter(initial: '/stats')),
         ],
         child: const IntentionApp(),
@@ -106,7 +109,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          storageProvider.overrideWithValue(
+              MemoryStorage(const AppState(onboarded: true))),
           routerProvider.overrideWith((_) => buildRouter(initial: '/settings')),
         ],
         child: const IntentionApp(),
@@ -171,6 +175,40 @@ void main() {
     expect(state.sessions.first.minutes, 20);
   });
 
+  testWidgets('Onboarding shows on first launch and "Begin" marks done',
+      (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // First panel of onboarding is shown
+    expect(find.text('INTENTION'), findsOneWidget);
+    expect(find.text('A quiet timer for your practice.'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+
+    // Skip jumps to the last panel
+    await tester.tap(find.text('skip'));
+    await tester.pumpAndSettle();
+    expect(find.text('Begin'), findsOneWidget);
+
+    // Begin marks onboarded
+    await tester.tap(find.text('Begin'));
+    await tester.pumpAndSettle();
+    final state = await container.read(appStateProvider.future);
+    expect(state.onboarded, true);
+  });
+
   testWidgets('Recovery: Add N-day streak seeds the sessions', (tester) async {
     await tester.binding.setSurfaceSize(const Size(800, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -207,7 +245,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          storageProvider.overrideWithValue(
+              MemoryStorage(const AppState(onboarded: true))),
         ],
         child: const IntentionApp(),
       ),
