@@ -101,6 +101,38 @@ void main() {
     expect(find.text('50'), findsAtLeastNWidgets(1));
   });
 
+  testWidgets('Settings shows four sub-tabs and switches between them',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          storageProvider.overrideWithValue(MemoryStorage(AppState.empty)),
+          routerProvider.overrideWith((_) => buildRouter(initial: '/settings')),
+        ],
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('PRACTICE'), findsOneWidget);
+    expect(find.text('APPEARANCE'), findsOneWidget);
+    expect(find.text('DATA'), findsOneWidget);
+    expect(find.text('ABOUT'), findsOneWidget);
+
+    // Default lands on Practice → empty stats
+    expect(find.textContaining('Your practice will live here'), findsOneWidget);
+
+    // Switch to About
+    await tester.tap(find.text('ABOUT'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('v0.1.0'), findsOneWidget);
+
+    // Switch to Appearance → "Theme" row is present
+    await tester.tap(find.text('APPEARANCE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Theme'), findsOneWidget);
+    expect(find.text('Numerals'), findsOneWidget);
+  });
+
   testWidgets('Setup → Start lands on Timer with remaining time',
       (tester) async {
     await tester.pumpWidget(

@@ -16,10 +16,6 @@ class StatsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final p = context.palette;
-    final state = ref.watch(appStateProvider).requireValue;
-    final sessions = state.sessions;
-    final streak = ref.watch(streakProvider);
-
     return Scaffold(
       backgroundColor: p.bg,
       appBar: AppBar(
@@ -41,14 +37,26 @@ class StatsScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: sessions.isEmpty
-          ? _EmptyState()
-          : _Filled(state: state, streak: streak),
+      body: const StatsBody(),
     );
   }
 }
 
+class StatsBody extends ConsumerWidget {
+  const StatsBody({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(appStateProvider).requireValue;
+    final streak = ref.watch(streakProvider);
+    return state.sessions.isEmpty
+        ? const _EmptyState()
+        : _Filled(state: state, streak: streak);
+  }
+}
+
 class _EmptyState extends StatelessWidget {
+  const _EmptyState();
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
