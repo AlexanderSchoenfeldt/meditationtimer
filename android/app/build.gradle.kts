@@ -15,10 +15,15 @@ val hasReleaseKey = keystoreProperties.isNotEmpty()
 
 android {
     namespace = "de.unfoldhuman.intention"
-    compileSdk = flutter.compileSdkVersion
+    // file_picker needs compileSdk ≥ 36; bump explicitly until Flutter's
+    // default catches up.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications uses Java 8+ APIs (java.time, …) that
+        // older Android runtimes don't have; the desugar lib backports them.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -36,7 +41,10 @@ android {
             create("release") {
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                // Resolve relative to the `android/` directory so `storeFile=
+                // upload-keystore.jks` in key.properties finds the keystore
+                // alongside it (matches the README's keytool example).
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
                 storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
@@ -70,4 +78,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

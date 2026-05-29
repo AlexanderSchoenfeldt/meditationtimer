@@ -16,3 +16,11 @@
 
 # Keep our notification receivers/services discoverable.
 -keep class de.unfoldhuman.intention.** { *; }
+
+# We don't bundle Google Play Core (no deferred components). Flutter still
+# references these classes for its play-store split-install path; tell R8
+# they're optional.
+-dontwarn com.google.android.play.core.**
+-dontwarn com.google.android.play.core.splitcompat.**
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
