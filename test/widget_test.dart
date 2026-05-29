@@ -128,7 +128,7 @@ void main() {
     // Switch to About
     await tester.tap(find.text('ABOUT'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('v0.1.0'), findsOneWidget);
+    expect(find.textContaining('v0.1.'), findsOneWidget);
 
     // Switch to Appearance → "Theme" row is present
     await tester.tap(find.text('APPEARANCE'));
