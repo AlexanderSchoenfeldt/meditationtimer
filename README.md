@@ -44,8 +44,8 @@ https://github.com/AlexanderSchoenfeldt/meditationtimer/releases/latest/download
 https://github.com/AlexanderSchoenfeldt/meditationtimer/releases/latest/download/intention.apk
 ```
 
-Drop those on unfold-human.de and they'll resolve to whatever version was
-cut last — no need to edit the link each release.
+Embed those anywhere you want and they'll resolve to whatever version
+was cut last — no need to edit the link each release.
 
 ## Develop
 

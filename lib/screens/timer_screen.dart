@@ -135,6 +135,21 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
   }
 
   Future<void> _onComplete() async {
+    final pending = ref.read(pendingSessionProvider);
+    await _finish(pending?.duration ?? _totalSeconds ~/ 60);
+  }
+
+  /// Finish a paused sit early: record the time sat so far (rounded to the
+  /// nearest minute) as a completed session instead of discarding it.
+  Future<void> _finishEarly() async {
+    final minutes = (_elapsed.inSeconds / 60).round();
+    await _finish(minutes < 1 ? 1 : minutes);
+  }
+
+  /// Shared completion path: stop the ticker, ring the closing bell, persist
+  /// the sit, and move on to the complete screen.
+  Future<void> _finish(int minutes) async {
+    _completed = true;
     _ticker?.cancel();
     unawaited(_releaseWakelock());
     unawaited(ref.read(notificationServiceProvider).cancel());
@@ -145,7 +160,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
       await ref.read(appStateProvider.notifier).addSession(
             Session(
               date: todayKey(now),
-              minutes: pending.duration,
+              minutes: minutes,
               ts: now.millisecondsSinceEpoch,
               type: pending.type,
             ),
@@ -345,6 +360,17 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
                           outlined: false,
                           onTap: _toggleRun,
                         ),
+                        // When paused, offer finishing early — recording the
+                        // time sat so far instead of having to discard it via
+                        // Stop. Mirrors Stop's 60s "worth recording" threshold.
+                        if (!_running && _elapsed.inSeconds >= 60) ...[
+                          const SizedBox(width: 24),
+                          _CircleButton(
+                            icon: Icons.check,
+                            outlined: true,
+                            onTap: _finishEarly,
+                          ),
+                        ],
                       ],
                     ),
                   ),

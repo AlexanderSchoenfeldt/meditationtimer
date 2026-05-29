@@ -69,7 +69,7 @@ jobs:
       - name: Stage release assets with stable names
         run: |
           mkdir -p dist
-          # Stable filenames so unfold-human.de can link to
+          # Stable filenames so external sites can link to
           # /releases/latest/download/<file>.apk and never need updating
           # when the version bumps.
           cp build/app/outputs/flutter-apk/app-release.apk            dist/intention.apk
