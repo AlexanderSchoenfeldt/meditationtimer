@@ -40,8 +40,8 @@ GitHub gives you a stable URL that always points at the latest release's
 matching asset:
 
 ```
-https://github.com/<your-github-user>/meditationtimer/releases/latest/download/intention-arm64-v8a.apk
-https://github.com/<your-github-user>/meditationtimer/releases/latest/download/intention.apk
+https://github.com/AlexanderSchoenfeldt/meditationtimer/releases/latest/download/intention-arm64-v8a.apk
+https://github.com/AlexanderSchoenfeldt/meditationtimer/releases/latest/download/intention.apk
 ```
 
 Drop those on unfold-human.de and they'll resolve to whatever version was
