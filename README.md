@@ -20,12 +20,32 @@ The exported backup is the same file you can open in any text editor.
 
 ## Download the APK
 
-APK builds are attached to the [GitHub Releases](../../releases) of this repo and
-mirrored at [unfold-human.de](https://unfold-human.de).
+The latest signed APK lives on the [GitHub Releases page](../../releases/latest).
+Pick the build that matches your phone — most modern phones want `arm64-v8a`:
 
-On your phone: tap the `.apk` to install. Android will ask for permission to
-install from an unknown source the first time — allow it for your browser, then
-re-tap.
+| Variant                          | Size  | Who it's for                          |
+| -------------------------------- | ----- | ------------------------------------- |
+| `intention-arm64-v8a.apk`        | ~19 MB | almost every phone from 2017+         |
+| `intention-armeabi-v7a.apk`      | ~16 MB | older / budget 32-bit phones          |
+| `intention-x86_64.apk`           | ~20 MB | emulators, Chromebooks                |
+| `intention.apk` (universal)      | ~52 MB | works on anything, three times bigger |
+
+On your phone: tap the `.apk` to install. Android asks once for permission to
+install from an unknown source — allow it for your browser, then re-open the
+file.
+
+### Linking from another site
+
+GitHub gives you a stable URL that always points at the latest release's
+matching asset:
+
+```
+https://github.com/<your-github-user>/meditationtimer/releases/latest/download/intention-arm64-v8a.apk
+https://github.com/<your-github-user>/meditationtimer/releases/latest/download/intention.apk
+```
+
+Drop those on unfold-human.de and they'll resolve to whatever version was
+cut last — no need to edit the link each release.
 
 ## Develop
 
@@ -90,8 +110,9 @@ git push origin v0.1.0
 ```
 
 The workflow runs analyzer + tests, decodes the keystore from secrets, builds
-a release APK named `intention-v0.1.0.apk`, and attaches it to a GitHub Release.
-Download from there, upload to `unfold-human.de`.
+both a universal APK and a per-ABI split (arm64-v8a, armeabi-v7a, x86_64),
+and attaches all four to a GitHub Release with stable filenames so the
+`releases/latest/download/…` links keep working.
 
 You can also trigger the workflow manually via the Actions tab — useful for a
 dry-run without cutting a tag.
