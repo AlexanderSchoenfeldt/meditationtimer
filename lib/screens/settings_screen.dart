@@ -398,7 +398,7 @@ class _AboutPane extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'v0.1.1',
+            'v0.1.2',
             style: TextStyle(
               fontSize: 11,
               color: p.ink3,

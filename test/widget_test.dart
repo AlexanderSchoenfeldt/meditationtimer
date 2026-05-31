@@ -209,6 +209,38 @@ void main() {
     expect(state.onboarded, true);
   });
 
+  testWidgets('Open sit: tapping the screen records a session',
+      (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        storageProvider.overrideWithValue(
+            MemoryStorage(const AppState(onboarded: true))),
+        routerProvider
+            .overrideWith((_) => buildRouter(initial: '/open-sit')),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const IntentionApp(),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('sitting'), findsOneWidget);
+    expect(find.text("tap when you're done"), findsOneWidget);
+
+    // Tap the centre of the screen to end the sit.
+    await tester.tap(find.text('sitting'), warnIfMissed: false);
+    await tester.pump();
+
+    final state = await container.read(appStateProvider.future);
+    expect(state.sessions.length, 1);
+    expect(state.sessions.first.minutes, greaterThanOrEqualTo(1));
+    expect(state.sessions.first.type, isNull);
+  });
+
   testWidgets('Recovery: Add N-day streak seeds the sessions', (tester) async {
     await tester.binding.setSurfaceSize(const Size(800, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));

@@ -17,6 +17,7 @@ class CompleteScreen extends ConsumerStatefulWidget {
 class _CompleteScreenState extends ConsumerState<CompleteScreen> {
   bool _showThank = false;
   bool _showDone = false;
+  Timer? _doneTimer;
 
   @override
   void initState() {
@@ -24,10 +25,16 @@ class _CompleteScreenState extends ConsumerState<CompleteScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() => _showThank = true);
-      Future.delayed(const Duration(milliseconds: 700), () {
+      _doneTimer = Timer(const Duration(milliseconds: 700), () {
         if (mounted) setState(() => _showDone = true);
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _doneTimer?.cancel();
+    super.dispose();
   }
 
   void _done() {
