@@ -5,35 +5,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
 class AudioService {
-  AudioPlayer? _player;
+  // Two distinct sounds, kept on separate players so an interval bell and the
+  // closing bell never fight over one player's position:
+  //   bell.wav     — short (~3s) bell rung at each interval during a sit.
+  //   bell_end.wav — long (~30s) realistic bell rung once when the sit ends.
+  AudioPlayer? _interval;
+  AudioPlayer? _ending;
 
-  Future<void> _ensure() async {
-    if (_player != null) return;
-    _player = AudioPlayer();
+  Future<AudioPlayer?> _ensure(AudioPlayer? player, String asset) async {
+    if (player != null) return player;
+    player = AudioPlayer();
     try {
-      await _player!.setAsset('assets/sounds/bell.wav');
+      await player.setAsset(asset);
     } catch (e) {
       // If the asset can't be loaded (e.g. unsupported platform in tests),
-      // leave the player constructed but inert. ringBell() will no-op.
-      if (kDebugMode) debugPrint('AudioService: failed to load bell — $e');
+      // leave the player constructed but inert — playback below no-ops.
+      if (kDebugMode) debugPrint('AudioService: failed to load $asset — $e');
+    }
+    return player;
+  }
+
+  Future<void> _play(AudioPlayer? player) async {
+    try {
+      await player?.seek(Duration.zero);
+      unawaited(player?.play());
+    } catch (e) {
+      if (kDebugMode) debugPrint('AudioService: playback error — $e');
     }
   }
 
-  // Plays the bell once from the start. Safe to call on top of itself —
-  // the previous ring is restarted rather than overlapping.
+  // Short interval bell, rung repeatedly during a sit. Safe to call on top of
+  // itself — the previous ring is restarted rather than overlapping.
   Future<void> ringBell() async {
-    try {
-      await _ensure();
-      await _player?.seek(Duration.zero);
-      unawaited(_player?.play());
-    } catch (e) {
-      if (kDebugMode) debugPrint('AudioService: ringBell error — $e');
-    }
+    _interval = await _ensure(_interval, 'assets/sounds/bell.wav');
+    await _play(_interval);
+  }
+
+  // Long, realistic closing bell, rung once when a sit ends.
+  Future<void> ringEndingBell() async {
+    _ending = await _ensure(_ending, 'assets/sounds/bell_end.wav');
+    await _play(_ending);
   }
 
   Future<void> dispose() async {
-    await _player?.dispose();
-    _player = null;
+    await _interval?.dispose();
+    await _ending?.dispose();
+    _interval = null;
+    _ending = null;
   }
 }
 

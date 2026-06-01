@@ -153,7 +153,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     _ticker?.cancel();
     unawaited(_releaseWakelock());
     unawaited(ref.read(notificationServiceProvider).cancel());
-    unawaited(ref.read(audioServiceProvider).ringBell());
+    unawaited(ref.read(audioServiceProvider).ringEndingBell());
     final pending = ref.read(pendingSessionProvider);
     if (pending != null) {
       final now = DateTime.now();
