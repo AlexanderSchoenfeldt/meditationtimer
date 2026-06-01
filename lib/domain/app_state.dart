@@ -29,17 +29,34 @@ class LastUsed {
 class Settings {
   final AppTheme theme;
   final bool useSerif;
+  final bool sound; // ring the bell aloud; off = a silent sit
+  final bool vibrate; // pulse the device at each bell, audible or not
 
-  const Settings({this.theme = AppTheme.light, this.useSerif = true});
+  const Settings({
+    this.theme = AppTheme.light,
+    this.useSerif = true,
+    this.sound = true,
+    this.vibrate = false,
+  });
 
-  Settings copyWith({AppTheme? theme, bool? useSerif}) => Settings(
+  Settings copyWith({
+    AppTheme? theme,
+    bool? useSerif,
+    bool? sound,
+    bool? vibrate,
+  }) =>
+      Settings(
         theme: theme ?? this.theme,
         useSerif: useSerif ?? this.useSerif,
+        sound: sound ?? this.sound,
+        vibrate: vibrate ?? this.vibrate,
       );
 
   Map<String, dynamic> toJson() => {
         'theme': theme.name,
         'useSerif': useSerif,
+        'sound': sound,
+        'vibrate': vibrate,
       };
 
   factory Settings.fromJson(Map<String, dynamic> j) => Settings(
@@ -48,6 +65,8 @@ class Settings {
           orElse: () => AppTheme.light,
         ),
         useSerif: j['useSerif'] as bool? ?? true,
+        sound: j['sound'] as bool? ?? true,
+        vibrate: j['vibrate'] as bool? ?? false,
       );
 }
 

@@ -160,10 +160,38 @@ class _AppearancePane extends ConsumerWidget {
             onChanged: (v) => notifier.setUseSerif(v == 'serif'),
           ),
         ),
+        _RowFrame(
+          label: 'Bell',
+          trailing: _Segmented(
+            options: const [(true, 'Sound'), (false, 'Silent')],
+            value: state.settings.sound,
+            onChanged: notifier.setSound,
+          ),
+        ),
+        _RowFrame(
+          label: 'Vibration',
+          trailing: _Segmented(
+            options: const [(true, 'On'), (false, 'Off')],
+            value: state.settings.vibrate,
+            onChanged: notifier.setVibrate,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
           child: Text(
             'Themes also follow the time of day in feel — light is warm off-white, sepia softens for long sits, dark fits late practice.',
+            style: TextStyle(
+              fontSize: 12,
+              color: p.ink3,
+              fontStyle: FontStyle.italic,
+              height: 1.5,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+          child: Text(
+            'Set the bell to silent and vibration on for a sit no one else can hear.',
             style: TextStyle(
               fontSize: 12,
               color: p.ink3,
@@ -398,7 +426,7 @@ class _AboutPane extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'v0.1.2',
+            'v0.1.3',
             style: TextStyle(
               fontSize: 11,
               color: p.ink3,

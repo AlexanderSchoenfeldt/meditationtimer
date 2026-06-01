@@ -124,7 +124,11 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
         elapsedMin % _bellMinutes == 0 &&
         elapsedMin != _lastBellMin) {
       _lastBellMin = elapsedMin;
-      unawaited(ref.read(audioServiceProvider).ringBell());
+      final s = ref.read(appStateProvider).valueOrNull?.settings;
+      unawaited(ref.read(audioServiceProvider).ringBell(
+            sound: s?.sound ?? true,
+            vibrate: s?.vibrate ?? false,
+          ));
     }
     if (_elapsed.inSeconds >= _totalSeconds && !_completed) {
       _completed = true;
@@ -153,7 +157,11 @@ class _TimerScreenState extends ConsumerState<TimerScreen>
     _ticker?.cancel();
     unawaited(_releaseWakelock());
     unawaited(ref.read(notificationServiceProvider).cancel());
-    unawaited(ref.read(audioServiceProvider).ringEndingBell());
+    final s = ref.read(appStateProvider).valueOrNull?.settings;
+    unawaited(ref.read(audioServiceProvider).ringEndingBell(
+          sound: s?.sound ?? true,
+          vibrate: s?.vibrate ?? false,
+        ));
     final pending = ref.read(pendingSessionProvider);
     if (pending != null) {
       final now = DateTime.now();

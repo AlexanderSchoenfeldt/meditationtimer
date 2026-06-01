@@ -30,6 +30,14 @@ class AppStateController extends AsyncNotifier<AppState> {
         (s) => s.copyWith(settings: s.settings.copyWith(useSerif: value)),
       );
 
+  Future<void> setSound(bool value) => _mutate(
+        (s) => s.copyWith(settings: s.settings.copyWith(sound: value)),
+      );
+
+  Future<void> setVibrate(bool value) => _mutate(
+        (s) => s.copyWith(settings: s.settings.copyWith(vibrate: value)),
+      );
+
   Future<void> markOnboarded() => _mutate((s) => s.copyWith(onboarded: true));
 
   Future<void> replace(AppState next) => _mutate((_) => next);

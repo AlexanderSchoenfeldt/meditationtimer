@@ -59,7 +59,11 @@ class _OpenSitScreenState extends ConsumerState<OpenSitScreen> {
     // Round to the nearest minute, floor to 1 so a quick tap still counts.
     final minutes = (elapsed.inSeconds / 60).round().clamp(1, 24 * 60);
 
-    unawaited(ref.read(audioServiceProvider).ringEndingBell());
+    final s = ref.read(appStateProvider).valueOrNull?.settings;
+    unawaited(ref.read(audioServiceProvider).ringEndingBell(
+          sound: s?.sound ?? true,
+          vibrate: s?.vibrate ?? false,
+        ));
 
     final now = DateTime.now();
     await ref.read(appStateProvider.notifier).addSession(
